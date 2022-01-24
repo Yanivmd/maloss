@@ -135,7 +135,13 @@ class PythonDeclRefVisitor(ast.NodeVisitor):
 
         full_name = name if base is None else '%s.%s' % (base, name)
         source_text = self.asttok.get_text(node)
-        source_range = (node.first_token.start, node.last_token.end)
+        if not hasattr(node, "first_token"):
+            logging.critical(f"*** NODE: {node} doesn't have 'first_token', TYPE={type(node)}, has {dir(node)}, "
+                             f"ORG={node.lineno}:{node.col_offset}***")
+            # need python 3.8 for these cases..
+            source_range = ((node.lineno, node.col_offset), (node.lineno, node.col_offset))
+        else:
+            source_range = (node.first_token.start, node.last_token.end)
         if self.func_only:
             name_to_check = '.' + name if base else name
         else:
@@ -212,7 +218,10 @@ def py3_astgen(inpath, outfile, configpb, root=None, pkg_name=None, pkg_version=
         pkg.pkg_version = pkg_version
     pkg.language = ast_pb2.PYTHON
     for infile in infiles:
-        all_source = open(infile, 'r').read()
+        try:
+            all_source = open(infile, 'r').read()
+        except UnicodeDecodeError as e:
+            logging.critical(f"[{infile}] {e.__class__.__name__}:{e}")
         try:
             tree = ast.parse(all_source, filename=infile)
         except SyntaxError as se:

@@ -5,13 +5,22 @@ apt-get install -yqq python python-pip python-dev python3 python3-pip python3-de
 # install python3.6 on ubuntu 16.04
 # http://ubuntuhandbook.org/index.php/2017/07/install-python-3-6-1-in-ubuntu-16-04-lts/
 apt-get install -yqq software-properties-common
-add-apt-repository ppa:jonathonf/python-3.6 -y
-apt-get update -yqq
-apt-get install -yqq python3.6 python3.6-dev
-# install pip3 for python
-curl -sS https://bootstrap.pypa.io/get-pip.py | python3.6 -
-echo "pip3.6 --version $(pip3.6 --version)"
-echo "python3.6 --version $(python3.6 --version)"
+sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
+libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl
+
+cd ~
+wget https://www.python.org/ftp/python/3.6.3/Python-3.6.3.tgz
+tar -xvf Python-3.6.3.tgz
+cd Python-3.6.3
+./configure --prefix /usr/bin/python-3.6.3 --enable-optimizations
+make -j 20
+make install
+update-alternatives --install /usr/bin/python3 python3 /usr/bin/python-3.6.3/bin/python3.6 1
+echo "PRESS 1"
+update-alternatives  --config python3
+ln -s /usr/share/pyshared/lsb_release.py /usr/bin/python-3.6.3/lib/python3.6/site-packages/lsb_release.py
+
 # install composer
 curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 # https://www.rosehosting.com/blog/how-to-install-node-js-on-ubuntu-16-04/
@@ -29,9 +38,11 @@ pip2 install --upgrade pip setuptools wheel
 # https://unix.stackexchange.com/questions/5609/how-do-i-clear-bashs-cache-of-paths-to-executables
 hash -r
 # make python3.6 the default version
-# http://ubuntuhandbook.org/index.php/2017/07/install-python-3-6-1-in-ubuntu-16-04-lts/
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.5 1
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 2
+# sudo update-alternatives --config python3
+
+sudo ln -s /usr/bin/pip3 /usr/bin/pip3.6
+sudo ln -s /usr/bin/python3 /usr/bin/python3.6
+
 # test the python and pip versions
 echo "pip3 --version $(pip3 --version)"
 echo "python3 --version $(python3 --version)"
@@ -43,6 +54,7 @@ echo "pip2 --version $(pip2 --version)"
 echo "python2 --version $(python2 --version)"
 
 # install python dependencies
+pip2 install decorator==4.3.0 numpy==1.9.0
 pip2 install -r src/requirements.txt
 pip3 install -r src/requirements3.txt
 
@@ -52,8 +64,14 @@ pip3 install -r src/requirements3.txt
 cd src/proto/javascript && npm update && cd ../../../
 cd src/pm_proxy/scripts && npm update && cd ../../../
 
-# ruby dependencies, parser creates a binary ruby-parse.
+
 # install ruby 2.5+
+curl -sSL https://rvm.io/mpapis.asc | sudo gpg --import -
+source /etc/profile.d/rvm.sh
+rvm list known
+rvm install ruby-2.5.8
+# ruby dependencies, parser creates a binary ruby-parse.
+
 gem install parser
 gem install google-protobuf -v 3.6.1
 gem install gem-path -v 0.6.2
@@ -61,11 +79,11 @@ gem install gem-path -v 0.6.2
 # php dependencies, parser
 # install php 7.2.6+
 # install composer 1.6.2+
-cd src/static_proxy && composer update && cd ../..
+#cd src/static_proxy && composer update && cd ../..
 
 # java dependencies
 # install maven 3.3.9+
-cd src/static_proxy/astgen-java/ && mvn clean compile assembly:single && cd ../../../
+#cd src/static_proxy/astgen-java/ && mvn clean compile assembly:single && cd ../../../
 
 # csharp dependencies
 
@@ -83,11 +101,15 @@ cd src/static_proxy/jsprime && npm update && cd ../../../
 # cd src/static_proxy/brakeman && gem build brakeman.gemspec && gem install ./brakeman-4.5.1.gem && cd ../../../
 gem install brakeman -v 4.6.1
 
+#echo "[*] The next install will error [*]"
+
 # php dependencies
-cd src/static_proxy/progpilot && ./build.sh && cd ../../../
+#cd src/static_proxy/progpilot && ./build.sh && cd ../../../
 
 # java dependencies
-cd src/static_proxy/flowdroid && ./build.sh && cd ../../../
+#cd src/static_proxy/flowdroid && ./build.sh && cd ../../../
 
 # csharp dependencies
+
+#echo "[*] Expected errors DONE [*]"
 
